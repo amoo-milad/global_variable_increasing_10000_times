@@ -5,33 +5,37 @@
 #include <windows.h>
 
 int data = 0;
-void func();
-
-DWORD WINAPI MyThreadFunc(LPVOID lpParameter)
-{
-	for (int i = 0; i < 10000; i++)
-		data++;
-
-	printf(" now data is : %d\n", data);
-	printf("thread finished!\n");
-	return 0;
-}
+int increment = 1;
+HANDLE* func();
+DWORD WINAPI MyThreadFunc(LPVOID lpParameter);
 
 int main()
 {
-	func();
+	HANDLE handles = func();
 	
-	_getch(); // the wait
-	printf("\nthe Global Data is : %d\n", data);
+	WaitForMultipleObjects(4,&handles,TRUE,INFINITE); // is '&handles' right?
+	printf("\n* Global Data is : %d *\n\n", data);
 	
 	_getch();
 	return 0;           
 }
 
-void func()
+HANDLE* func()
 {
-	CreateThread(NULL, 0, &MyThreadFunc, 0, 0, NULL);
-	CreateThread(NULL, 0, &MyThreadFunc, 0, 0, NULL);
-	CreateThread(NULL, 0, &MyThreadFunc, 0, 0, NULL);
-	CreateThread(NULL, 0, &MyThreadFunc, 0, 0, NULL);
+	HANDLE h1 = CreateThread(NULL, 0, &MyThreadFunc, 0, 0, NULL);
+	HANDLE h2 = CreateThread(NULL, 0, &MyThreadFunc, 0, 0, NULL);
+	HANDLE h3 = CreateThread(NULL, 0, &MyThreadFunc, 0, 0, NULL);
+	HANDLE h4 = CreateThread(NULL, 0, &MyThreadFunc, 0, 0, NULL);
+	HANDLE handles[] = {h1,h2,h3,h4};
+	return handles;
+}
+
+DWORD WINAPI MyThreadFunc(LPVOID lpParameter)
+{
+	for (int i = 0; i < 10000; i++)
+		data++;
+	//	data = data + increment;
+
+	printf("now data is: %d\t end of thread!\n\n", data);
+	return 0;
 }
